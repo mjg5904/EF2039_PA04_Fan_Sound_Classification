@@ -8,7 +8,7 @@ from run_experiments import audio_features
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--audio', required=True)
-    p.add_argument('--model', default='results/real/near_and_far_model.joblib')
+    p.add_argument('--model', default='results/augmented_binary/original_near_only_model.joblib')
     p.add_argument('--channel', choices=['near', 'far'], default='near')
     args = p.parse_args()
     model = joblib.load(args.model)
@@ -16,6 +16,11 @@ def main():
     channel = 0 if args.channel == 'near' else 1
     if channel >= audio.shape[1]:
         raise ValueError('Audio does not contain the selected channel')
+    # Match the evaluation protocol: use the middle two seconds.
+    length = int(round(2 * sr))
+    if len(audio) > length:
+        start = (len(audio) - length) // 2
+        audio = audio[start:start + length]
     features = audio_features(audio[:, channel], sr).reshape(1, -1)
     prediction = model.predict(features)[0]
     print('Predicted fan condition:', prediction)

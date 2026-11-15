@@ -18,25 +18,22 @@ This project studies **normal vs anomalous fan sound classification** using real
 
 ## Reproduce from scratch
 
-With a clean Python environment, run:
+Use Python 3.12 in a fresh clone. On Backend.AI or Linux:
 
 ```bash
-python -m pip install -r requirements.txt
+git clone https://github.com/mjg5904/EF2039_PA04_Fan_Sound_Classification.git
+cd EF2039_PA04_Fan_Sound_Classification
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r metadata/reproduction_requirements.txt
 python download_real_data.py --out data/real_binary --per-class 100
 python check_data.py --data data/real_binary
 python augment_1000.py --source data/real_binary --out data/augmented_binary_1000 --count 1000
-python run_augmented_experiments.py --source data/real_binary --augmented data/augmented_binary_1000 --out results/augmented_binary
+python run_augmented_experiments.py --source data/real_binary --augmented data/augmented_binary_1000 --out results/reproduced
+diff -u results/augmented_binary/summary.csv results/reproduced/summary.csv
 ```
 
-The download step fetches the official `dev_fan.zip` and verifies its checksum. If you have already placed the original ZIP in `data/dev_fan.zip`, replace that line with:
-
-```bash
-python download_real_data.py --no-download --out data/real_binary --per-class 100
-```
-
-The downloader may need internet access, disk space, and time. On repeated runs, remove or choose new output directories for data that already contains a `manifest.csv`; the scripts refuse to silently overwrite existing manifests.
-
-Environment: see `requirements.txt` and the example `environment.yml` (Conda). The original experiment ran in Backend.AI using Python 3.12; `environment.yml` specifies a compatible Python 3.10 alternative. For an exact recreation, use package versions captured from the original run (to be added as `installed_versions.txt`). CPU execution is supported; a GPU is not required.
+If the official ZIP is already available locally, replace the download line with `python download_real_data.py --zip /path/to/dev_fan.zip --no-download --out data/real_binary --per-class 100`, substituting its actual path. The script verifies the official checksum. Use fresh output directories for data preparation; existing manifests are not overwritten. CPU execution is sufficient (tested with two CPU cores and 10 GiB RAM); internet access and disk space are needed for the dataset. The broad dependency ranges in `requirements.txt` and example `environment.yml` are alternatives, not the exact verified environment. The pinned file records the successful reproduction environment; the original run's full pip freeze was not captured.
 
 ## Experimental setup
 
@@ -82,6 +79,8 @@ python predict.py --audio data/real_binary/normal_000.wav --model results/augmen
 
 ## Transparency and limitations
 
-The full original dataset (704 MB) and the augmented WAVs are intentionally not checked into GitHub. They can be recreated using the recorded source and fixed seed. **For strongest reproducibility, also include the actual files `data/real_binary/manifest.csv`, `data/augmented_binary_1000/original_splits.csv`, `data/augmented_binary_1000/manifest.csv`, and `data/augmented_binary_1000/augmentation_info.json` from the completed Backend.AI session** in a folder named `metadata/` (do not upload WAV files). These are not bundled because the actual Backend.AI data folder was not provided along with the results ZIP.
+The original archive and derived WAVs are not redistributed. The fixed-seed scripts regenerate them from the official data source. `metadata/real_source_manifest.csv`, `metadata/original_splits.csv`, `metadata/augmentation_manifest.csv`, and `metadata/augmentation_info.json` record the actual data selection, splits, and augmentation used for the reported results. The test set was not augmented. These are classroom supervised results, not official DCASE benchmark scores. The sample size is small and model C includes twice as many channel examples as B. Accuracy alone hides class-specific errors; the far-channel model B missed all 20 anomalies.
 
-All filenames and labels in the README describe the revised **normal/anomaly** task, not the abandoned fan-speed experiment. Do not upload the old synthetic demonstration dataset as if it were real audio.
+## Reproducibility verification
+
+On November 15, 2026, all three models were retrained and evaluated in a fresh GitHub clone on Backend.AI using the official dataset archive. All six accuracy and macro-F1 pairs matched the original results exactly, and `diff -u` reported no difference between the two summary CSV files. The reproduction environment is recorded in `metadata/reproduction_requirements.txt`. The single-file inference helper uses the same two-second center crop as the evaluation code; it does not change the reported training or evaluation results.
