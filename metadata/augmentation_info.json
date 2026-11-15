@@ -1,0 +1,20 @@
+{
+  "source": "data/real_binary",
+  "out": "data/augmented_binary_1000",
+  "seed": 2026,
+  "augmentation_files": 1000,
+  "original_files": 200,
+  "original_train_files": 120,
+  "original_validation_files": 40,
+  "original_test_files": 40,
+  "labels": {
+    "anomaly": 500,
+    "normal": 500
+  },
+  "sample_rate": 16000,
+  "duration_seconds": 2.0,
+  "original_type": [
+    "DCASE_2026_ZENODO_19336329"
+  ],
+  "critical_warning": "Derivatives are NOT independent recordings. Never evaluate on derivatives of training audio. Synthetic demo source must not be described as a real fan recording."
+}
